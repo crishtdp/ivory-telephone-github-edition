@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>CS AA</title>
+
+    <style>
+
+        body{
+            margin:1%
+            
+        }
+
+        .innerdiv{
+            border: 0.2vw solid black;
+            border-radius: 2vw;
+            margin: 2%;
+            font-size: 1vw;
+        }
+
+
+        h2{
+            font-size: 2vw;
+        }
+
+        input{
+            border: 0.2vw solid black;
+            border-radius: 0.5vw;
+        }
+
+        button{
+            border: 0.2vw solid black;
+            border-radius: 0.5vw;
+        }
+
+        #yesbutton{
+            background-color: greenyellow;
+            color: black;
+        }
+
+        #nobutton{
+            background-color: darkred;
+            color: white;
+        }
+
+        table{
+            width: 75%;
+        }
+
+        table td {
+            border: 0.2vw dashed rgba(0, 0, 0, 0.1);
+        }
+
+        table button {
+            border: 0;
+            background-color: transparent;
+        }
+
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .responsive {
+            width: 10vw;
+            height: auto;
+        }
+
+        .centerit {
+            text-align: center;
+
+            font-size: 4vw;
+
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+    </style>
+
+    <script>
+
+        var locStorWorking = true;
+        var flashtimer = 1;
+
+        function nameExistsInList(name, list){
+
+            console.log(list)
+
+            for(var i = 0; i < list.length; i++){
+                if(list[i].split(",")[0] == name){
+                    return i
+                }
+            }
+
+            return -1
+        }
+
+        function addToTable(text){
+
+            text = text.toString()
+
+            var tr = document.getElementById("friendstable").appendChild(document.createElement('tr'))
+            var td = tr.appendChild(document.createElement('td'));
+            var bu = td.appendChild(document.createElement('button'));
+            bu.innerText = text
+            tr.setAttribute("id", text.toString()+".parent")
+            bu.setAttribute("id", text)
+            bu.setAttribute("id", text)
+            bu.setAttribute("onclick", "NameClicked(this)")
+        }
+
+        function addFriend(name, addr, phon, data){
+            if(document.getElementById("Go add some friends!.parent") == undefined || document.getElementById("Go add some friends!.parent") == null){
+
+            }else{
+                document.getElementById("Go add some friends!.parent").remove()
+            }
+            
+            if(locStorWorking){
+
+                var prevFriendList = localStorage.getItem("ivorytelephone-friendslist").toString();
+
+                if(nameExistsInList(name, prevFriendList.split(";")) != -1){
+                    //friend already exists!
+
+                    if(confirm("Do you want to update the information for "+name+"?")){
+                        var array = prevFriendList.split(";")
+
+                        var search = -1
+
+                        for(var i = 0; i < array.length; i++){
+                            if(array[i].split(",")[0] == name){
+                                search = i
+                                break;
+                            }
+                        }
+
+                        array[search] = data;
+
+                        var reconstruct = ""
+
+                        for(var i = 0; i < array.length; i++){
+                            if(reconstruct != ""){
+                                reconstruct += ";"
+                            }
+
+                            reconstruct += array[i]
+                        }
+
+                        localStorage.setItem("ivorytelephone-friendslist", reconstruct)
+                    }
+
+                }else{
+                    
+                    addToTable(name)
+
+                    if(prevFriendList != ""){
+                        localStorage.setItem("ivorytelephone-friendslist", prevFriendList+";"+data);
+                    }else{
+                        localStorage.setItem("ivorytelephone-friendslist", data)
+                    }
+                }
+
+
+            }else{
+                addToTable(name)
+            }
+
+        }
+
+        function OnReady(){
+            if (typeof(Storage) !== "undefined") {
+            
+            } else {
+                locStorWorking = false;
+                alert("Sorry for breaking your immersion with this fake friend adding site, but I regret to inform you that your browser does not support localstorage!")
+                alert("You'll still be able to add friends, but you won't see them again after you leave.")
+            }
+
+            if(localStorage.getItem("ivorytelephone-friendslist") == null || localStorage.getItem("ivorytelephone-friendslist") == "undefined" || locStorWorking == false || localStorage.getItem("ivorytelephone-friendslist") == ""){
+                addToTable("Go add some friends!")
+
+                if(locStorWorking){
+                    localStorage.setItem("ivorytelephone-friendslist", "");
+                }
+            }else{
+
+                var array = localStorage.getItem("ivorytelephone-friendslist").split(";");
+
+                for(i = 0; i < array.length; i++){
+                    addToTable(array[i].split(",")[0])
+                }
+            }
+        }
+
+        function NoButton(){
+            //alert("lost potential for a friend...")
+
+            var name = document.getElementById("fname").value;
+            var addr = document.getElementById("address").value
+            var phon = document.getElementById("phone").value
+
+            var stop = (name == "" || name == undefined || name == null || addr == "" || addr == undefined || addr == null || phon == "" || phon == undefined || phon == null);
+
+            var friendData = name.toString()+","+addr.toString()+","+phon.toString()
+
+            if(stop || localStorage.getItem("ivorytelephone-friendslist").includes(friendData) == false){
+                document.getElementById("fname").value = ""
+                document.getElementById("address").value = ""
+                document.getElementById("phone").value = ""
+            }else if (locStorWorking){
+
+                
+                if(localStorage.getItem("ivorytelephone-unfriendcount") == null || localStorage.getItem("ivorytelephone-unfriendcount") == "undefined" || locStorWorking == false || localStorage.getItem("ivorytelephone-unfriendcount") == ""){
+                    localStorage.setItem("ivorytelephone-unfriendcount", 1);
+                }
+                else{
+                    localStorage.setItem("ivorytelephone-unfriendcount", Number(localStorage.getItem("ivorytelephone-unfriendcount"))+1);
+                }
+
+                document.getElementById(name+".parent").remove()
+
+                var prevFriendList = localStorage.getItem("ivorytelephone-friendslist").toString();
+
+
+                localStorage.setItem("ivorytelephone-friendslist", prevFriendList.replace(friendData+";",""))
+
+                if(localStorage.getItem("ivorytelephone-friendslist").toString() == prevFriendList){
+                    localStorage.setItem("ivorytelephone-friendslist", prevFriendList.replace(";"+friendData,""))
+                }else{
+                    return
+                }
+
+                if(localStorage.getItem("ivorytelephone-friendslist").toString() == prevFriendList){
+                    localStorage.setItem("ivorytelephone-friendslist", prevFriendList.replace(friendData,""))
+                }else{
+                    return
+                }
+
+            }
+        }
+
+        function YesButton(){
+            var name = document.getElementById("fname").value;
+            var addr = document.getElementById("address").value
+            var phon = document.getElementById("phone").value
+
+            var stop = (name == "" || name == undefined || name == null || addr == "" || addr == undefined || addr == null || phon == "" || phon == undefined || phon == null);
+
+            if (stop) return;
+
+            var friendData = name.toString()+","+addr.toString()+","+phon.toString()
+
+            document.getElementById("fname").value = ""
+            document.getElementById("address").value = ""
+            document.getElementById("phone").value = ""
+
+            addFriend(name, addr, phon, friendData)
+        }
+
+        function NameClicked(btn){
+            var id = btn.id.toString()
+
+            if(id == "Go add some friends!"){
+                return;
+            }
+
+            if(!locStorWorking){
+                alert("Sorry again, but local storage does not work on your browser.")
+                alert("The data of your friends wasn't saved.")
+                alert("So like I guess go get a browser that supports local storage.")
+                alert("That's kind of the point of this whole assignment.")
+                return;
+            }
+
+            var prevFriendList = localStorage.getItem("ivorytelephone-friendslist").toString();
+
+            var array = prevFriendList.split(";")
+
+            var search = -1
+
+
+            
+
+            for(var i = 0; i < array.length; i++){
+                if(array[i].split(",")[0] == (id)){
+                    search = i
+                    break;
+                }
+            }
+
+            var data = array[search]
+
+            var name = data.split(",")[0]
+            var addr = data.split(",")[1]
+            var phon = data.split(",")[2]
+
+            document.getElementById("fname").value = name
+            document.getElementById("address").value = addr
+            document.getElementById("phone").value = phon
+
+        }
+
+        function Update(){
+
+            var unfriendcount = Number(localStorage.getItem("ivorytelephone-unfriendcount"))
+
+            flashtimer -= 1
+
+            if(unfriendcount < 24){
+                document.body.style.backgroundColor = "#FFFFFF"
+            }else{
+                document.body.style.backgroundColor = rgbToHex(255-((unfriendcount-23)*0.66), 255-((unfriendcount-23)*2), 255-((unfriendcount-23)*2))
+
+                if(unfriendcount >= 34){
+
+                    console.log("name: FORGIVE ME / address: IM SORRY")
+
+                    storyelements = 0
+
+                    if((document.getElementById("fname").value.includes("juno") || document.getElementById("fname").value.includes("Juno")) && (document.getElementById("fname").value.includes("juno") || document.getElementById("fname").value.includes("Juno")) && (document.getElementById("fname").value.includes("gonzales") || document.getElementById("fname").value.includes("Gonzales"))){
+                        storyelements += 1
+                    }
+
+                    if(document.getElementById("address").value == "fgbaf" || document.getElementById("address").value == "FGBAF" || document.getElementById("address").value == "Fgbaf" || document.getElementById("address").value.toString().toLowerCase() == "five guys burgers and fries"){
+                        storyelements += 1
+                    }
+
+                    if(document.getElementById("phone").value == "032924" || document.getElementById("phone").value == "32924" || document.getElementById("phone").value == "03292024" || document.getElementById("phone").value == "3292024"){
+                        storyelements += 1
+                    }
+
+                    if(document.getElementById("phone").value == "290324"  || document.getElementById("phone").value == "29032024"){
+                        storyelements += 1
+                    }
+
+                    
+                    if(flashtimer >= 0 && flashtimer <=4){
+                        document.body.style.backgroundImage = "url('Newspaper.jpg')"
+                    }else{
+                        document.body.style.backgroundImage = null
+                    }
+
+                    if(flashtimer < 0){
+                        flashtimer = (Math.floor((Math.random())*(20*(4-storyelements))))+5
+                    }
+
+
+                    if(storyelements > 0 && storyelements < 3){
+                        document.body.style.backgroundColor = rgbToHex(255-((unfriendcount-23)*storyelements), 255-((unfriendcount-23)*(storyelements+1)), 255-((unfriendcount-23)*(storyelements+1)))
+                    }else if(storyelements == 3){
+                        document.body.style.backgroundColor = rgbToHex(50, 0,0)
+                    }
+
+                    if(document.getElementById("fname").value == "FORGIVE ME" && document.getElementById("address").value == "IM SORRY"){
+                        localStorage.setItem("ivorytelephone-unfriendcount", Number(0));
+                        location.reload();
+                    }
+                }
+            }
+
+            var fl = localStorage.getItem("ivorytelephone-friendslist");
+
+            if(fl != ""){
+
+                var friendcount = fl.split(";").length.toString()
+
+                if(friendcount != "1"){
+                    document.getElementById("friendsheader").innerHTML = friendcount+" Friends";
+                }else{
+                    document.getElementById("friendsheader").innerHTML = friendcount+" Friend";
+                }
+            }else{
+                document.getElementById("friendsheader").innerHTML = "0 Friends";
+            }
+
+            var name = document.getElementById("fname").value;
+            var addr = document.getElementById("address").value
+            var phon = document.getElementById("phone").value
+
+            var stop = (name == "" || name == undefined || name == null || addr == "" || addr == undefined || addr == null || phon == "" || phon == undefined || phon == null);
+
+            var friendData = name.toString()+","+addr.toString()+","+phon.toString()
+
+            if(stop || fl.includes(friendData) == false){
+                document.getElementById("nobutton").innerHTML = "nevermind..."
+            }else{
+                document.getElementById("nobutton").innerHTML = "remove friend..."
+            }
+        }
+
+        function rgbToHexSub(foo){
+            if(foo >= 0 && foo <= 9){
+                return foo.toString();
+            }else if(foo == 10){
+                return "A";
+            }else if(foo == 11){
+                return "B";
+            }else if(foo == 12){
+                return "C";
+            }else if(foo == 13){
+                return "D";
+            }else if(foo == 14){
+                return "E";
+            }else if(foo == 15){
+                return "F";
+            }
+        }
+
+        function rgbToHex(r,g,b){
+
+            if(r == undefined || g == undefined || b == undefined){
+                if((r.toString().length == 7 || r.toString().length == 9)){
+                    return r.toString();
+                }else{
+                    if(r == undefined){
+                        r = 0;
+                    }
+                    if(g == undefined){
+                        g = 0;
+                    }
+                    if(b == undefined){
+                        b = 0;
+                    }
+                }
+            }
+
+            r = Math.floor(r)
+            g = Math.floor(g)
+            b = Math.floor(b)
+
+            return ("#"+rgbToHexSub(Math.floor(r/16))+rgbToHexSub(r%16)+rgbToHexSub(Math.floor(g/16))+rgbToHexSub(g%16)+rgbToHexSub(Math.floor(b/16))+rgbToHexSub(b%16))
+        }
+
+    </script>
+
+</head>
+<body>
+
+    <img src="StockImage.png" alt="logo" class="responsive centerit"><h1 class="centerit">Ivory Telephone</h1>
+
+    <div class="row">
+        <div class="col-4 innerdiv">
+            <br>
+            <h2 id="friendsheader">Friends</h2>
+            <br>
+            <table id="friendstable">
+            </table>
+
+        </div>
+        <div class="col-7 innerdiv">
+            <br>
+            <h2>Details</h2>
+            <br>
+            <p>Name</p>
+            <input type="text" id="fname" name="fname">
+            <br>
+            <br>
+            <p>Address</p>
+            <input type="text" id="address" name="address">
+            <br>
+            <br>
+            <p>Phone Number</p>
+            <input type="number" id="phone" name="phone">
+            <br>
+            <br>
+            <br>
+            <button id="yesbutton" onclick="YesButton()">Add Friend!</button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="nobutton" onclick="NoButton()">nevermind...</button>
+            <br>
+            <br>
+        </div>
+    </div>
+
+    <script>
+        OnReady()
+
+        setInterval(Update, 10);
+    </script>
+    
+</body>
+</html>
